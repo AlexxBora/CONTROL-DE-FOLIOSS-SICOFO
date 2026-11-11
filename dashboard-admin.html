@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SICOFO - Panel Administrativo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="img/logo-sicofo.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Contenedor de toasts -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <nav class="navbar-asiste">
+    <img class="navbar-logo" src="img/logo-sicofo.png" alt="SICOFO">
+    <a class="navbar-brand" href="dashboard-admin.html">
+      <span>
+        <span class="brand-title d-block">SPyAP</span>
+        <span class="brand-subtitle">Administrador</span>
+      </span>
+    </a>
+    <ul class="nav nav-tabs-asiste" id="adminTabs" role="tablist">
+      <li class="nav-item">
+        <button class="tab-link active" data-bs-toggle="tab" data-bs-target="#tab-panel" type="button" role="tab">
+          <i class="bi bi-speedometer2 me-1" aria-hidden="true"></i>Resumen
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="tab-link" data-bs-toggle="tab" data-bs-target="#tab-usuarios" type="button" role="tab">
+          <i class="bi bi-people me-1" aria-hidden="true"></i>Usuarios <span class="tab-count" id="tab-count-usuarios">0</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="tab-link" data-bs-toggle="tab" data-bs-target="#tab-areas" type="button" role="tab">
+          <i class="bi bi-diagram-3 me-1" aria-hidden="true"></i>Áreas <span class="tab-count" id="tab-count-areas">0</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="tab-link" data-bs-toggle="tab" data-bs-target="#tab-reportes" type="button" role="tab">
+          <i class="bi bi-clipboard-data me-1" aria-hidden="true"></i>Reportes
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="tab-link" data-bs-toggle="tab" data-bs-target="#tab-folios" type="button" role="tab">
+          <i class="bi bi-files me-1" aria-hidden="true"></i>Folios <span class="tab-count" id="tab-count-folios">0</span>
+        </button>
+      </li>
+    </ul>
+    <div class="user-info">
+      <div class="navbar-user">
+        <div class="navbar-avatar-iniciales" id="avatar-iniciales"></div>
+        <div class="navbar-user-info">
+          <span class="navbar-user-nombre" id="nombre-usuario"></span>
+          <span class="navbar-user-area" id="area-usuario"></span>
+          <span class="rol-badge" id="rol-badge"></span>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <div class="container-admin pt-4 pb-4">
+    <h1 class="page-title">Panel de Control General</h1>
+
+    <div class="tab-content" id="adminTabContent">
+
+      <!-- PESTAÑA RESUMEN -->
+      <div class="tab-pane fade show active" id="tab-panel" role="tabpanel">
+        <div class="row">
+          <div class="col-12 mb-4">
+            <div class="card-asiste">
+              <div class="card-header-asiste">
+                <h3 class="card-title-asiste"><i class="bi bi-folder2-open me-1" aria-hidden="true"></i>Documentos por estatus</h3>
+                <span class="badge text-primario">Total: <strong id="total-oficios">0</strong></span>
+              </div>
+              <div class="kpi-counters">
+                <div class="kpi-counter">
+                  <div class="kpi-counter-num" id="oficios-pendientes">0</div>
+                  <div class="kpi-counter-label">Pendientes</div>
+                </div>
+                <div class="kpi-counter">
+                  <div class="kpi-counter-num" id="oficios-asignados">0</div>
+                  <div class="kpi-counter-label">Asignados</div>
+                </div>
+                <div class="kpi-counter">
+                  <div class="kpi-counter-num" id="oficios-cancelados">0</div>
+                  <div class="kpi-counter-label">Cancelados</div>
+                </div>
+                <div class="kpi-counter">
+                  <div class="kpi-counter-num" id="oficios-rechazados">0</div>
+                  <div class="kpi-counter-label">Rechazados</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 col-md-6 mb-4">
+            <div class="card-asiste">
+              <div class="card-header-asiste">
+                <h3 class="card-title-asiste">Usuarios</h3>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="kpi-number" id="kpi-usuarios" style="font-size:2rem;">0</div>
+                  <div class="kpi-label">usuarios registrados</div>
+                </div>
+                <button type="button" class="btn btn-asiste-primary btn-sm" onclick="mostrarTab('tab-usuarios')"><i class="bi bi-sliders me-1" aria-hidden="true"></i>Gestionar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 mb-4">
+            <div class="card-asiste">
+              <div class="card-header-asiste">
+                <h3 class="card-title-asiste">Áreas</h3>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="kpi-number" id="kpi-areas" style="font-size:2rem;">0</div>
+                  <div class="kpi-label">áreas configuradas</div>
+                </div>
+                <button type="button" class="btn btn-asiste-primary btn-sm" onclick="mostrarTab('tab-areas')"><i class="bi bi-sliders me-1" aria-hidden="true"></i>Configurar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-asiste">
+          <div class="card-header-asiste">
+            <h3 class="card-title-asiste">Acciones Rápidas</h3>
+          </div>
+          <div class="row g-2">
+            <div class="col-12 col-md-4">
+              <button type="button" class="btn btn-asiste-primary w-100" onclick="mostrarTab('tab-usuarios')"><i class="bi bi-people me-1" aria-hidden="true"></i>Gestión de Usuarios</button>
+            </div>
+            <div class="col-12 col-md-4">
+              <button type="button" class="btn btn-asiste-primary w-100" onclick="mostrarTab('tab-areas')"><i class="bi bi-diagram-3 me-1" aria-hidden="true"></i>Configurar Áreas</button>
+            </div>
+            <div class="col-12 col-md-4">
+              <button type="button" class="btn btn-asiste-primary w-100" onclick="mostrarTab('tab-reportes')"><i class="bi bi-clipboard-data me-1" aria-hidden="true"></i>Reportes Complejos</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendario de folios -->
+        <div class="card-asiste cal-folios-card">
+          <div class="card-header-asiste">
+            <h3 class="card-title-asiste">Calendario de folios por día</h3>
+          </div>
+          <div class="cal-folios-contenedor" id="calendario-folios"></div>
+        </div>
+      </div>
+
+      <!-- PESTAÑA USUARIOS (CRUD) -->
+      <div class="tab-pane fade" id="tab-usuarios" role="tabpanel">
+        <div class="card-asiste">
+          <div class="card-header-asiste">
+            <h3 class="card-title-asiste">Nuevo usuario</h3>
+          </div>
+          <form id="formUsuario">
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Nombres</label>
+                <input type="text" class="form-control" id="usuario-nombres" placeholder="Ej: María" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Apellidos</label>
+                <input type="text" class="form-control" id="usuario-apellidos" placeholder="Ej: López García" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Área de adscripción</label>
+                <select class="form-select" id="usuario-area" required></select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Nombre de usuario</label>
+                <input type="text" class="form-control" id="usuario-empleado" placeholder="Ej: ADM-002" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="usuario-password" placeholder="Mínimo 4 caracteres" autocomplete="new-password">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Rol</label>
+                <select class="form-select" id="usuario-rol" required>
+                  <option value="1">Administrador</option>
+                  <option value="2">Visor</option>
+                  <option value="3">Foliador</option>
+                </select>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-asiste-primary" id="btn-guardar-usuario"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Guardar usuario</button>
+              <button type="button" class="btn btn-asiste-secondary d-none" id="btn-cancelar-edicion" onclick="cancelarEdicionUsuario()">Cancelar edición</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card-asiste">
+          <div class="card-header-asiste">
+            <h3 class="card-title-asiste">Usuarios registrados</h3>
+            <span class="badge text-primario">Total: <span id="crud-total-usuarios">0</span></span>
+          </div>
+          <div class="table-responsive">
+            <table class="table-asiste">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nombre</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>Área</th>
+                  <th>Estado</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-usuarios"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PESTAÑA ÁREAS (CRUD) -->
+      <div class="tab-pane fade" id="tab-areas" role="tabpanel">
+        <div class="card-asiste">
+          <div class="card-header-asiste">
+            <h3 class="card-title-asiste">Nueva área</h3>
+          </div>
+          <form id="formArea">
+            <div class="row">
+              <div class="col-md-5 mb-3">
+                <label class="form-label">Nombre del área</label>
+                <input type="text" class="form-control" id="area-nombre" placeholder="Ej: Dirección de Planeación" required>
+              </div>
+              <div class="col-md-3 mb-3">
+                <label class="form-label">Sigla</label>
+                <input type="text" class="form-control" id="area-sigla" placeholder="Ej: DP" maxlength="6" style="text-transform:uppercase;" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Depende de (área superior)</label>
+                <select class="form-select" id="area-padre">
+                  <option value="">— Sin área superior —</option>
+                </select>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-asiste-primary" id="btn-guardar-area"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Guardar área</button>
+              <button type="button" class="btn btn-asiste-secondary d-none" id="btn-cancelar-area" onclick="cancelarEdicionArea()">Cancelar edición</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card-asiste">
+          <div class="card-header-asiste">
+            <h3 class="card-title-asiste">Áreas registradas</h3>
+            <span class="badge text-primario">Total: <span id="crud-total-areas">0</span></span>
+          </div>
+          <div class="table-responsive">
+            <table class="table-asiste">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Sigla</th>
+                  <th>Nivel</th>
+                  <th>Área superior</th>
+                  <th>Estado</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-areas"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PESTAÑA REPORTES -->
+      <div class="tab-pane fade" id="tab-reportes" role="tabpanel">
+        <h2 class="page-title mb-3">Reportes Complejos</h2>
+
+        <div class="filters-section no-print">
+          <div class="filter-row">
+            <div class="filter-group">
+              <label class="form-label">Periodo desde</label>
+              <input type="date" class="form-control" id="filtro-desde">
+            </div>
+            <div class="filter-group">
+              <label class="form-label">Periodo hasta</label>
+              <input type="date" class="form-control" id="filtro-hasta">
+            </div>
+            <div class="filter-group">
+              <label class="form-label">Tipo de oficio</label>
+              <select class="form-select" id="filtro-tipo">
+                <option value="">Todos</option>
+                <option value="oficios">Oficio</option>
+                <option value="memorandums">Memorandum</option>
+                <option value="circulares">Circular</option>
+                <option value="incidencias">Incidencias</option>
+                <option value="memorandums_comision">Memorandum de Comisión</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="form-label">Área</label>
+              <select class="form-select" id="filtro-area">
+                <option value="">Todas</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label class="form-label">&nbsp;</label>
+              <button type="button" class="btn btn-asiste-primary w-100" onclick="aplicarFiltros()"><i class="bi bi-search me-1" aria-hidden="true"></i>Generar reporte</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-6 col-md-3 mb-3">
+            <div class="card-kpi card-asiste">
+              <div class="kpi-number" id="kpi-total">0</div>
+              <div class="kpi-label">Registros</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3 mb-3">
+            <div class="card-kpi card-asiste">
+              <div class="kpi-number" id="kpi-pendientes">0</div>
+              <div class="kpi-label">Pendientes</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3 mb-3">
+            <div class="card-kpi card-asiste">
+              <div class="kpi-number" id="kpi-asignados">0</div>
+              <div class="kpi-label">Asignados</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3 mb-3">
+            <div class="card-kpi card-asiste">
+              <div class="kpi-number" id="kpi-cancelados">0</div>
+              <div class="kpi-label">Cancelados</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3 mb-3">
+            <div class="card-kpi card-asiste">
+              <div class="kpi-number" id="kpi-rechazados">0</div>
+              <div class="kpi-label">Rechazados</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 col-lg-6 mb-4">
+            <div class="card-asiste">
+              <div class="card-header-asiste">
+                <h3 class="card-title-asiste">Registros por tipo de oficio</h3>
+              </div>
+              <div class="table-responsive">
+                <table class="table-asiste">
+                  <thead>
+                    <tr><th>Tipo</th><th>Cantidad</th></tr>
+                  </thead>
+                  <tbody id="tabla-por-tipo"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6 mb-4">
+            <div class="card-asiste">
+              <div class="card-header-asiste">
+                <h3 class="card-title-asiste">Registros por área</h3>
+              </div>
+              <div class="table-responsive">
+                <table class="table-asiste">
+                  <thead>
+                    <tr><th>Área</th><th>Sigla</th><th class="text-end">Cantidad</th></tr>
+                  </thead>
+                  <tbody id="tabla-por-area"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-asiste print-report">
+          <div class="card-header-asiste no-print">
+            <h3 class="card-title-asiste">Detalle del reporte</h3>
+            <span class="badge text-primario" id="total-detalle">0</span>
+          </div>
+          <div class="print-report-title d-none" id="print-titulo">Reporte de Control de Correspondencia</div>
+          <div class="table-responsive">
+            <table class="table-asiste">
+              <thead>
+                <tr>
+                  <th>Folio</th>
+                  <th>Tipo</th>
+                  <th>Área</th>
+                  <th>Dirigido a</th>
+                  <th title="Solo aplica a Oficio y Memorándum">Cargo/Dependencia de Origen</th>
+                  <th>Asunto</th>
+                  <th>Estatus</th>
+                  <th>Fecha de solicitud</th>
+                  <th>Fecha del documento</th>
+                  <th class="text-end">Detalle</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-detalle"></tbody>
+            </table>
+          </div>
+          <div class="d-flex gap-2 mt-3 no-print">
+            <button type="button" class="btn btn-asiste-primary" onclick="imprimirReporte()"><i class="bi bi-printer me-1" aria-hidden="true"></i>Imprimir / PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PESTAÑA FOLIOS (CORRECCIÓN DE CAPTURA) -->
+      <div class="tab-pane fade" id="tab-folios" role="tabpanel">
+        <div class="card-asiste">
+          <div class="card-header-asiste">
+            <h3 class="card-title-asiste">Corrección de folios</h3>
+            <span class="badge text-primario">Total: <span id="crud-total-folios">0</span></span>
+          </div>
+          <div class="row g-2 mb-3 no-print">
+            <div class="col-6 col-md-3">
+              <input type="text" class="form-control" id="filtro-folio-txt" placeholder="Folio, solicitante o asunto" oninput="filtrarFoliosAdmin()">
+            </div>
+            <div class="col-6 col-md-2">
+              <select class="form-select" id="filtro-folio-tipo" onchange="filtrarFoliosAdmin()"></select>
+            </div>
+            <div class="col-6 col-md-3">
+              <select class="form-select" id="filtro-folio-area" onchange="filtrarFoliosAdmin()"></select>
+            </div>
+            <div class="col-6 col-md-2">
+              <select class="form-select" id="filtro-folio-estatus" onchange="filtrarFoliosAdmin()">
+                <option value="">Todos los estatus</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Asignado">Asignado</option>
+                <option value="Cancelado">Cancelado</option>
+                <option value="Rechazado">Rechazado</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2 d-flex align-items-center">
+              <button type="button" class="btn btn-asiste-secondary btn-sm w-100" onclick="limpiarFiltrosFolios()">Limpiar</button>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="table-asiste">
+              <thead>
+                <tr>
+                  <th>Folio</th>
+                  <th>Tipo</th>
+                  <th>Área</th>
+                  <th>Dirigido a</th>
+                  <th title="Solo aplica a Oficio y Memorándum">Cargo/Dependencia de Origen</th>
+                  <th>Asunto</th>
+                  <th>Estatus</th>
+                  <th>Fecha de solicitud</th>
+                  <th>Fecha del documento</th>
+                  <th class="text-end">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-folios-admin"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal de detalle del reporte -->
+  <div class="modal fade modal--detalle" id="modalDetalleReporte" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header modal-header-asiste">
+          <h5 class="modal-title" id="detalle-reporte-titulo">Detalle del folio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div id="detalle-reporte-contenido"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-asiste-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de corrección de folio (solo Administrador) -->
+  <div class="modal fade modal--formulario" id="modalEditarFolio" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header modal-header-asiste">
+          <h5 class="modal-title">Corrección: <span id="fol-edit-tipo-texto"></span></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="fol-edit-tabla">
+          <input type="hidden" id="fol-edit-folio">
+          <div class="modal-aviso"><i class="bi bi-pencil-square" aria-hidden="true"></i><span>Modifique únicamente los datos necesarios. El área se conserva para proteger la serie original del folio.</span></div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Área</label>
+              <select class="form-select" id="fol-edit-area" disabled></select>
+              <small class="text-secondary">El área no se puede modificar: la serie del folio depende de ella.</small>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Solicitante</label>
+              <select class="form-select" id="fol-edit-solicitante"></select>
+            </div>
+            <div class="col-12 mb-3">
+              <label class="form-label">Asunto</label>
+              <input type="text" class="form-control" id="fol-edit-asunto" maxlength="200">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Dirigido a</label>
+              <input type="text" class="form-control" id="fol-edit-dirigido" maxlength="200" placeholder="A quién va dirigido el oficio">
+            </div>
+            <div class="col-md-6 mb-3" id="fol-edit-cargo-origen-grupo">
+              <label class="form-label" for="fol-edit-cargo-origen">Cargo/Dependencia de Origen</label>
+              <input type="text" class="form-control" id="fol-edit-cargo-origen" maxlength="200" placeholder="Ej: Director de Planeación">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Fecha del documento</label>
+              <input type="date" class="form-control" id="fol-edit-fechadoc">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Fecha de solicitud</label>
+              <input type="date" class="form-control" id="fol-edit-fechasol">
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Estatus</label>
+              <select class="form-select" id="fol-edit-estatus">
+                <option value="Pendiente">Pendiente</option>
+                <option value="Asignado">Asignado</option>
+                <option value="Cancelado">Cancelado</option>
+                <option value="Rechazado">Rechazado</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-asiste-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-asiste-primary" onclick="guardarCorreccionFolio()"><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Guardar corrección</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer-asiste">
+    Secretaría de Pesca y Acuacultura del Pueblo · Gobierno de Chiapas 2024 – 2030 · SICOFO
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    let usuarioEditandoId = null;
+    let areaEditandoId = null;
+    let registrosFolios = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const session = sesionVigente({ rol: ROLES.ADMINISTRADOR, mensaje: 'No tiene permiso para ver este panel' });
+      if (!session) return;
+      pintarUsuario(session);
+      cargarEstadisticas();
+      llenarAreas();
+      llenarSelectPadres();
+      cargarUsuarios();
+      cargarAreas();
+      actualizarContadores();
+      llenarSelectFiltroAreas();
+      aplicarFiltros();
+      cargarFoliosAdmin();
+      renderCalendarioFolios('calendario-folios');
+
+      const formUsuario = document.getElementById('formUsuario');
+      formUsuario.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const nombres = document.getElementById('usuario-nombres').value.trim();
+        const apellidos = document.getElementById('usuario-apellidos').value.trim();
+        const empleado = document.getElementById('usuario-empleado').value.trim().toUpperCase();
+        const password = document.getElementById('usuario-password').value;
+        const rol = Number(document.getElementById('usuario-rol').value);
+        const areaId = document.getElementById('usuario-area').value;
+
+        if (password.length > 0 && password.length < 4) {
+          showToast('La contraseña debe tener al menos 4 caracteres', 'warning');
+          return;
+        }
+
+        const ok = usuarioEditandoId
+          ? actualizarUsuario(usuarioEditandoId, nombres, apellidos, empleado, password, rol, areaId)
+          : crearUsuario(nombres, apellidos, empleado, password, rol, areaId);
+        if (!ok) return;
+
+        document.getElementById('formUsuario').reset();
+        usuarioEditandoId = null;
+        document.getElementById('btn-guardar-usuario').textContent = 'Guardar usuario';
+        document.getElementById('btn-cancelar-edicion').classList.add('d-none');
+        cargarUsuarios();
+        actualizarDashboard();
+      });
+
+      const formArea = document.getElementById('formArea');
+      formArea.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const nombre = document.getElementById('area-nombre').value.trim();
+        const sigla = document.getElementById('area-sigla').value.trim().toUpperCase();
+        const padre = document.getElementById('area-padre').value ? Number(document.getElementById('area-padre').value) : null;
+
+        if (!/^[A-Z0-9]+$/.test(sigla)) {
+          showToast('La sigla solo puede contener letras y números, sin espacios', 'warning');
+          return;
+        }
+
+        const ok = areaEditandoId
+          ? actualizarArea(areaEditandoId, nombre, sigla, padre)
+          : crearArea(nombre, sigla, padre);
+        if (!ok) return;
+
+        document.getElementById('formArea').reset();
+        areaEditandoId = null;
+        document.getElementById('btn-guardar-area').textContent = 'Guardar área';
+        document.getElementById('btn-cancelar-area').classList.add('d-none');
+        llenarSelectPadres();
+        cargarAreas();
+        actualizarDashboard();
+      });
+    });
+
+
+    function mostrarTab(targetId) {
+      const tabEl = document.querySelector(`[data-bs-target="#${targetId}"]`);
+      if (tabEl) {
+        new bootstrap.Tab(tabEl).show();
+      }
+    }
+
+    function actualizarContadores() {
+      const totalUsuarios = Object.keys(getUsuarios()).length;
+      const totalAreas = getAreas().length;
+      document.getElementById('kpi-usuarios').innerText = totalUsuarios;
+      document.getElementById('kpi-areas').innerText = totalAreas;
+      document.getElementById('tab-count-usuarios').textContent = totalUsuarios;
+      document.getElementById('tab-count-areas').textContent = totalAreas;
+      document.getElementById('crud-total-usuarios').innerText = totalUsuarios;
+      document.getElementById('crud-total-areas').innerText = totalAreas;
+    }
+
+    function actualizarDashboard() {
+      cargarEstadisticas();
+      actualizarContadores();
+    }
+
+    function cargarEstadisticas() {
+      const usuarios = getUsuarios();
+      const oficios = getOficios();
+      const areas = getAreas();
+
+      document.getElementById('kpi-usuarios').innerText = Object.keys(usuarios).length;
+      document.getElementById('total-oficios').innerText = Object.values(oficios).reduce((sum, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0);
+
+      let pendientes = 0, asignados = 0, cancelados = 0, rechazados = 0;
+      Object.values(oficios).forEach(tabla => {
+        (tabla || []).forEach(f => {
+          if (f.estatus === 'Pendiente') pendientes++;
+          if (f.estatus === 'Asignado') asignados++;
+          if (f.estatus === 'Cancelado') cancelados++;
+          if (f.estatus === 'Rechazado') rechazados++;
+        });
+      });
+      document.getElementById('oficios-pendientes').innerText = pendientes;
+      document.getElementById('oficios-asignados').innerText = asignados;
+      document.getElementById('oficios-cancelados').innerText = cancelados;
+      document.getElementById('oficios-rechazados').innerText = rechazados;
+      document.getElementById('kpi-areas').innerText = areas.length;
+    }
+
+    function llenarAreas() {
+      const areas = getAreas();
+      const select = document.getElementById('usuario-area');
+      select.innerHTML = '';
+      areas.forEach(area => {
+        if (area.activo === false) return;
+        const option = document.createElement('option');
+        option.value = area.id;
+        option.textContent = area.nombre + ' (' + area.sigla + ')';
+        select.appendChild(option);
+      });
+    }
+
+    function llenarSelectPadres() {
+      const areas = getAreas();
+      const select = document.getElementById('area-padre');
+      const prevValue = select.value;
+      select.innerHTML = '<option value="">— Sin área superior —</option>';
+      areas.forEach(area => {
+        if (area.activo === false) return;
+        if (area.id !== Number(areaEditandoId)) {
+          const option = document.createElement('option');
+          option.value = area.id;
+          option.textContent = area.nombre + ' (Nivel ' + nivelDeArea(area) + ')';
+          select.appendChild(option);
+        }
+      });
+      if (prevValue) select.value = prevValue;
+    }
+
+    function cargarUsuarios() {
+      const usuarios = getUsuarios();
+      const tbody = document.getElementById('tabla-usuarios');
+      tbody.innerHTML = '';
+
+      const keys = Object.keys(usuarios);
+      const rows = keys.map(k => usuarios[k]).filter(u => u);
+      rows.sort((a, b) => String(a.numero_empleado).localeCompare(String(b.numero_empleado)));
+
+      rows.forEach((u, i) => {
+        const sesionActual = getSession();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td><strong>${escapeHtml(u.nombre || 'Sin nombre')}</strong></td>
+          <td><span class="badge bg-primario">${escapeHtml(u.numero_empleado || 'N/A')}</span></td>
+          <td>${escapeHtml(nombreRol(u.rol))}</td>
+          <td>${escapeHtml(getAreaNameById(u.area))}</td>
+          <td>${u.activo ? '<span class="badge-status badge-activo">Activo</span>' : '<span class="badge-status badge-inactivo">Inactivo</span>'}</td>
+          <td class="text-end">
+            <div class="admin-table-actions">
+              <button type="button" class="btn btn-asiste-primary btn-sm" onclick="editarUsuario('${escapeJs(u.id)}')"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Editar</button>
+              <button type="button" class="btn btn-sm btn-asiste-secondary ${u.id === sesionActual.id ? 'disabled' : ''}" ${u.id === sesionActual.id ? 'disabled' : ''} onclick="toggleEstadoUsuario('${escapeJs(u.id)}')"><i class="bi ${u.activo ? 'bi-toggle-off' : 'bi-toggle-on'} me-1" aria-hidden="true"></i>${u.activo ? 'Desactivar' : 'Activar'}</button>
+              ${u.id === sesionActual.id ? '' : `<button type="button" class="btn btn-sm btn-danger" onclick="eliminarUsuario('${escapeJs(u.id)}')"><i class="bi bi-trash me-1" aria-hidden="true"></i>Eliminar</button>`}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-secondary">No hay usuarios registrados</td></tr>`;
+      }
+      document.getElementById('crud-total-usuarios').textContent = rows.length;
+      actualizarContadores();
+    }
+
+    function crearUsuario(nombres, apellidos, empleado, password, rol, areaId) {
+      if (empleadoExists(empleado, null)) {
+        showToast('El nombre de usuario ya está registrado', 'warning');
+        return false;
+      }
+      if (!password || !empleado) {
+        showToast('La contraseña es obligatoria al crear el usuario', 'warning');
+        return false;
+      }
+      const nombreCompleto = (nombres + ' ' + apellidos).trim();
+      const id = 'user-' + String(generarNextUserId()).padStart(3, '0');
+      const usuarios = getUsuarios();
+      usuarios[id] = {
+        id: id,
+        nombres: nombres,
+        apellidos: apellidos,
+        nombre: nombreCompleto,
+        numero_empleado: empleado,
+        password: password,
+        rol: rol,
+        area: Number(areaId),
+        activo: true
+      };
+      guardarUsuarios(usuarios);
+      showToast('Usuario creado: ' + empleado, 'success');
+      return true;
+    }
+
+    function actualizarUsuario(id, nombres, apellidos, empleado, password, rol, areaId) {
+      if (empleadoExists(empleado, id)) {
+        showToast('El nombre de usuario ya está registrado en otro usuario', 'warning');
+        return false;
+      }
+      const usuarios = getUsuarios();
+      if (usuarios[id]) {
+        if (id === getSession().id && rol !== ROLES.ADMINISTRADOR) {
+          showToast('No puede quitarse el rol de Administrador a sí mismo', 'warning');
+          return false;
+        }
+        const nombreCompleto = (nombres + ' ' + apellidos).trim();
+        usuarios[id].nombres = nombres;
+        usuarios[id].apellidos = apellidos;
+        usuarios[id].nombre = nombreCompleto;
+        usuarios[id].numero_empleado = empleado;
+        if (password && password.length >= 4) {
+          usuarios[id].password = password;
+        }
+        usuarios[id].rol = rol;
+        usuarios[id].area = Number(areaId);
+        guardarUsuarios(usuarios);
+        showToast('Usuario actualizado: ' + empleado, 'success');
+        return true;
+      }
+      return false;
+    }
+
+    function editarUsuario(id) {
+      const usuarios = getUsuarios();
+      const u = usuarios[id];
+      if (!u) return;
+      usuarioEditandoId = id;
+      document.getElementById('usuario-nombres').value = u.nombres || '';
+      document.getElementById('usuario-apellidos').value = u.apellidos || '';
+      document.getElementById('usuario-empleado').value = u.numero_empleado || '';
+      document.getElementById('usuario-password').value = '';
+      document.getElementById('usuario-rol').value = String(u.rol || '3');
+      document.getElementById('usuario-area').value = String(u.area || '');
+      document.getElementById('btn-guardar-usuario').textContent = 'Actualizar usuario';
+      document.getElementById('btn-cancelar-edicion').classList.remove('d-none');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelarEdicionUsuario() {
+      usuarioEditandoId = null;
+      document.getElementById('formUsuario').reset();
+      document.getElementById('btn-guardar-usuario').textContent = 'Guardar usuario';
+      document.getElementById('btn-cancelar-edicion').classList.add('d-none');
+    }
+
+    function toggleEstadoUsuario(id) {
+      const usuarios = getUsuarios();
+      if (id === getSession().id) {
+        showToast('No puede desactivar su propia cuenta', 'warning');
+        return;
+      }
+      if (usuarios[id]) {
+        usuarios[id].activo = !usuarios[id].activo;
+        guardarUsuarios(usuarios);
+        showToast(usuarios[id].activo ? 'Usuario activado' : 'Usuario desactivado', 'success');
+        cargarUsuarios();
+        actualizarContadores();
+      }
+    }
+
+    function eliminarUsuario(id) {
+      if (id === getSession().id) {
+        showToast('No puede eliminar su propia cuenta', 'warning');
+        return;
+      }
+      const usuarios = getUsuarios();
+      const usuario = usuarios[id];
+      if (!usuario) return;
+      const oficios = getOficios();
+      const foliosAsociados = TODAS_LAS_TABLAS.some(tabla =>
+        (oficios[tabla] || []).some(f => String(f.id_usuario_solicitante) === String(id))
+      );
+      if (foliosAsociados) {
+        showToast('No puede eliminar un usuario con folios asociados a su nombre', 'warning');
+        return;
+      }
+      if (!confirm('¿Eliminar este usuario?')) return;
+      if (usuarios[id]) {
+        delete usuarios[id];
+        guardarUsuarios(usuarios);
+        showToast('Usuario eliminado', 'success');
+        cargarUsuarios();
+        actualizarContadores();
+      }
+    }
+
+    function cargarAreas() {
+      const areas = getAreas();
+      const tbody = document.getElementById('tabla-areas');
+      tbody.innerHTML = '';
+
+      areas.sort((a, b) => nivelDeArea(a) - nivelDeArea(b));
+      areas.forEach(a => {
+        const padre = getAreaById(a.padre);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="badge bg-primario">${escapeHtml(a.id)}</span></td>
+          <td><strong>${escapeHtml(a.nombre || a.nombre_area)}</strong></td>
+          <td><span class="badge-status badge-en-atencion">${escapeHtml(a.sigla)}</span></td>
+          <td>Nivel ${nivelDeArea(a)}</td>
+          <td>${padre ? escapeHtml(padre.nombre || padre.nombre_area) : '<span class="text-secondary">—</span>'}</td>
+          <td>${a.activo ? '<span class="badge-status badge-activo">Activo</span>' : '<span class="badge-status badge-inactivo">Inactivo</span>'}</td>
+          <td class="text-end">
+            <div class="admin-table-actions">
+              <button type="button" class="btn btn-asiste-primary btn-sm" onclick="editarArea(${a.id})"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Editar</button>
+              <button type="button" class="btn btn-sm btn-asiste-secondary" onclick="toggleEstadoArea(${a.id})"><i class="bi ${a.activo ? 'bi-toggle-off' : 'bi-toggle-on'} me-1" aria-hidden="true"></i>${a.activo ? 'Desactivar' : 'Activar'}</button>
+              <button type="button" class="btn btn-sm btn-danger" onclick="eliminarArea(${a.id})"><i class="bi bi-trash me-1" aria-hidden="true"></i>Eliminar</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (areas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-secondary">No hay áreas configuradas</td></tr>`;
+      }
+      document.getElementById('crud-total-areas').textContent = areas.length;
+      actualizarContadores();
+    }
+
+    function crearArea(nombre, sigla, padre) {
+      if (!/^[A-Z0-9]+$/.test(sigla)) {
+        showToast('La sigla solo puede contener letras y números, sin espacios', 'warning');
+        return false;
+      }
+      if (areaExistsBySigla(sigla, null)) {
+        showToast('La sigla "' + sigla + '" ya está registrada', 'warning');
+        return false;
+      }
+      if (padre == null && getAreas().some(a => a.padre == null && a.activo !== false)) {
+        showToast('Ya existe un área central (sin área superior). Elija un área superior.', 'warning');
+        return false;
+      }
+      const areas = getAreas();
+      const id = generarNextAreaId();
+      areas.push({
+        id: id,
+        nombre: nombre,
+        sigla: sigla,
+        padre: padre,
+        activo: true
+      });
+      guardarAreas(areas);
+      showToast('Área creada: ' + nombre + ' (' + sigla + ')', 'success');
+      return true;
+    }
+
+    function actualizarArea(id, nombre, sigla, padre) {
+      if (!/^[A-Z0-9]+$/.test(sigla)) {
+        showToast('La sigla solo puede contener letras y números, sin espacios', 'warning');
+        return false;
+      }
+      if (areaExistsBySigla(sigla, id)) {
+        showToast('La sigla "' + sigla + '" ya está registrada en otra área', 'warning');
+        return false;
+      }
+      if (padre === id) {
+        showToast('Un área no puede depender de sí misma', 'warning');
+        return false;
+      }
+      if (padre != null && esDescendienteDe(padre, id)) {
+        showToast('El área superior elegida depende de esta área (ciclo en la jerarquía)', 'warning');
+        return false;
+      }
+      const areas = getAreas();
+      const area = areas.find(a => a.id === id);
+      if (area && padre == null && areas.some(a => a.id !== id && a.padre == null && a.activo !== false)) {
+        showToast('Ya existe un área central (sin área superior). Elija un área superior.', 'warning');
+        return false;
+      }
+      if (area && area.sigla !== sigla && areaTieneFolios(id)) {
+        showToast('No puede cambiar la sigla: el área ya tiene folios con la sigla ' + area.sigla, 'warning');
+        return false;
+      }
+      if (area) {
+        area.nombre = nombre;
+        area.sigla = sigla;
+        area.padre = padre;
+        guardarAreas(areas);
+        showToast('Área actualizada', 'success');
+        return true;
+      }
+      return false;
+    }
+
+    function editarArea(id) {
+      const areas = getAreas();
+      const a = areas.find(x => x.id === id);
+      if (!a) return;
+      areaEditandoId = id;
+      document.getElementById('area-nombre').value = a.nombre || a.nombre_area || '';
+      document.getElementById('area-sigla').value = a.sigla || '';
+      llenarSelectPadres();
+      document.getElementById('area-padre').value = a.padre ? String(a.padre) : '';
+      document.getElementById('btn-guardar-area').textContent = 'Actualizar área';
+      document.getElementById('btn-cancelar-area').classList.remove('d-none');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelarEdicionArea() {
+      areaEditandoId = null;
+      document.getElementById('formArea').reset();
+      document.getElementById('btn-guardar-area').textContent = 'Guardar área';
+      document.getElementById('btn-cancelar-area').classList.add('d-none');
+    }
+
+    function toggleEstadoArea(id) {
+      const areas = getAreas();
+      const area = areas.find(a => a.id === id);
+      if (area && area.activo && area.padre == null) {
+        showToast('No puede desactivar el área central', 'warning');
+        return;
+      }
+      if (area) {
+        area.activo = !area.activo;
+        guardarAreas(areas);
+        showToast(area.activo ? 'Área activada' : 'Área desactivada', 'success');
+        cargarAreas();
+        actualizarContadores();
+      }
+    }
+
+    function eliminarArea(id) {
+      const usuarios = getUsuarios();
+      const tieneUsuarios = Object.keys(usuarios).some(k => usuarios[k] && String(usuarios[k].area) === String(id));
+      if (tieneUsuarios) {
+        showToast('No puede eliminar un área que tiene usuarios asignados', 'warning');
+        return;
+      }
+      let areas = getAreas();
+      const objetivo = areas.find(a => a.id === id);
+      if (objetivo && objetivo.padre == null) {
+        showToast('No puede eliminar el área central', 'warning');
+        return;
+      }
+      if (areas.some(a => a.padre === id)) {
+        showToast('No puede eliminar un área que tiene áreas dependientes', 'warning');
+        return;
+      }
+      if (areaTieneFolios(id)) {
+        showToast('No puede eliminar un área con folios registrados; desactívela en su lugar', 'warning');
+        return;
+      }
+      if (!confirm('¿Eliminar esta área?')) return;
+      areas = areas.filter(a => a.id !== id);
+      guardarAreas(areas);
+      showToast('Área eliminada', 'success');
+      llenarSelectPadres();
+      cargarAreas();
+      actualizarContadores();
+    }
+
+    function llenarSelectFiltroAreas() {
+      const areas = getAreas();
+      const select = document.getElementById('filtro-area');
+      select.innerHTML = '<option value="">Todas</option>';
+      areas.forEach(area => {
+        const option = document.createElement('option');
+        option.value = area.id;
+        option.textContent = area.nombre + ' (' + area.sigla + ')';
+        select.appendChild(option);
+      });
+    }
+
+    function obtenerRegistros() {
+      const oficios = getOficios();
+      const registros = [];
+      Object.keys(oficios).forEach(tabla => {
+        (oficios[tabla] || []).forEach(f => {
+          registros.push({ tabla: tabla, f: f });
+        });
+      });
+      return registros;
+    }
+
+    function aplicarFiltros() {
+      const desde = document.getElementById('filtro-desde').value;
+      const hasta = document.getElementById('filtro-hasta').value;
+      const tipo = document.getElementById('filtro-tipo').value;
+      const areaId = document.getElementById('filtro-area').value;
+
+      let registros = obtenerRegistros();
+
+      if (tipo) registros = registros.filter(r => r.tabla === tipo);
+      if (areaId) registros = registros.filter(r => String(r.f.id_area) === String(areaId));
+
+      if (desde) {
+        registros = registros.filter(r => {
+          const d = aFechaLocal(r.f.fecha_solicitud);
+          return d && d >= desde;
+        });
+      }
+      if (hasta) {
+        registros = registros.filter(r => {
+          const d = aFechaLocal(r.f.fecha_solicitud);
+          return d && d <= hasta;
+        });
+      }
+
+      renderKPIs(registros);
+      renderPorTipo(registros);
+      renderPorArea(registros);
+      renderDetalle(registros);
+    }
+
+    function renderKPIs(registros) {
+      const total = registros.length;
+      const pendientes = registros.filter(r => r.f.estatus === 'Pendiente').length;
+      const asignados = registros.filter(r => r.f.estatus === 'Asignado').length;
+      const cancelados = registros.filter(r => r.f.estatus === 'Cancelado').length;
+      const rechazados = registros.filter(r => r.f.estatus === 'Rechazado').length;
+      document.getElementById('kpi-total').textContent = total;
+      document.getElementById('kpi-pendientes').textContent = pendientes;
+      document.getElementById('kpi-asignados').textContent = asignados;
+      document.getElementById('kpi-cancelados').textContent = cancelados;
+      document.getElementById('kpi-rechazados').textContent = rechazados;
+      document.getElementById('total-detalle').textContent = total;
+    }
+
+    function renderPorTipo(registros) {
+      const tbody = document.getElementById('tabla-por-tipo');
+      tbody.innerHTML = '';
+      const conteo = {};
+      registros.forEach(r => { conteo[r.tabla] = (conteo[r.tabla] || 0) + 1; });
+      Object.keys(conteo).sort().forEach(tabla => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><span class="badge bg-primario">${escapeHtml(NOMBRES_OFICIO[tabla] || tabla)}</span></td><td><strong>${conteo[tabla]}</strong></td>`;
+        tbody.appendChild(tr);
+      });
+      if (Object.keys(conteo).length === 0) {
+        tbody.innerHTML = `<tr><td colspan="2" class="text-center text-secondary">Sin datos en el periodo</td></tr>`;
+      }
+    }
+
+    function renderPorArea(registros) {
+      const tbody = document.getElementById('tabla-por-area');
+      tbody.innerHTML = '';
+      const conteo = {};
+      registros.forEach(r => {
+        const id = r.f.id_area || 0;
+        conteo[id] = (conteo[id] || 0) + 1;
+      });
+      Object.keys(conteo).sort((a, b) => conteo[b] - conteo[a]).forEach(id => {
+        const area = getAreaById(id);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHtml(area ? (area.nombre || area.nombre_area) : 'Sin área')}</td>
+          <td><span class="badge-status badge-en-atencion">${escapeHtml(area ? area.sigla : '—')}</span></td>
+          <td class="text-end"><strong>${conteo[id]}</strong></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      if (Object.keys(conteo).length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-secondary">Sin datos en el periodo</td></tr>`;
+      }
+    }
+
+
+    function renderDetalle(registros) {
+      const tbody = document.getElementById('tabla-detalle');
+      tbody.innerHTML = '';
+      const orden = registros.slice().reverse();
+      orden.forEach(({ tabla, f }) => {
+        const fecha = f.fecha_solicitud ? presentarFecha(f.fecha_solicitud) : 'N/A';
+        const fechaDoc = f.fecha_documento ? presentarFecha(f.fecha_documento) : 'N/A';
+const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(f.folio || '—')}</strong></td>
+          <td><span class="badge bg-primario">${escapeHtml(NOMBRES_OFICIO[tabla] || tabla)}</span></td>
+          <td>${escapeHtml(getAreaNameById(f.id_area))}</td>
+          <td>${escapeHtml(f.dirigido_a || '—')}</td>
+          <td>${escapeHtml(valorOrigen(f, tabla) || '—')}</td>
+          <td>${escapeHtml(f.asunto ? f.asunto.substring(0, 40) : 'Sin asunto')}</td>
+          <td>${badgeEstatus(f.estatus)}</td>
+          <td>${fecha}</td>
+          <td>${fechaDoc}</td>
+          <td class="text-end">
+            ${f.folio ? `<button type="button" class="btn btn-asiste-primary btn-sm" onclick="verDetalleReporte('${escapeJs(tabla)}', '${escapeJs(String(f.folio))}')"><i class="bi bi-eye me-1" aria-hidden="true"></i>Ver detalle</button>` : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      if (orden.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center text-secondary">No hay registros para el reporte</td></tr>`;
+      }
+    }
+
+    function verDetalleReporte(tabla, folio) {
+      mostrarDetalleFolioModal(tabla, folio, 'detalle-reporte-titulo', 'detalle-reporte-contenido', 'modalDetalleReporte');
+    }
+
+    function imprimirReporte() {
+      document.getElementById('print-titulo').classList.remove('d-none');
+      window.print();
+      document.getElementById('print-titulo').classList.add('d-none');
+    }
+
+    // ===== Pestaña Folios: corrección de captura (solo Administrador) =====
+    function cargarFoliosAdmin() {
+      llenarSelectFiltroFolios();
+      const oficios = getOficios();
+      const lista = [];
+      Object.keys(oficios).forEach(tabla => {
+        (oficios[tabla] || []).forEach(f => lista.push({ tabla: tabla, f: f }));
+      });
+      lista.reverse();
+      registrosFolios = lista;
+      filtrarFoliosAdmin();
+    }
+
+    function llenarSelectFiltroFolios() {
+      const tipo = document.getElementById('filtro-folio-tipo');
+      tipo.innerHTML = '<option value="">Todos los tipos</option>';
+      TODAS_LAS_TABLAS.forEach(t => {
+        const o = document.createElement('option');
+        o.value = t;
+        o.textContent = NOMBRES_OFICIO[t] || t;
+        tipo.appendChild(o);
+      });
+      const area = document.getElementById('filtro-folio-area');
+      area.innerHTML = '<option value="">Todas las áreas</option>';
+      getAreas().forEach(a => {
+        if (a.activo === false) return;
+        const o = document.createElement('option');
+        o.value = a.id;
+        o.textContent = a.nombre + ' (' + a.sigla + ')';
+        area.appendChild(o);
+      });
+    }
+
+    function limpiarFiltrosFolios() {
+      document.getElementById('filtro-folio-txt').value = '';
+      document.getElementById('filtro-folio-tipo').value = '';
+      document.getElementById('filtro-folio-area').value = '';
+      document.getElementById('filtro-folio-estatus').value = '';
+      cargarFoliosAdmin();
+    }
+
+    function filtrarFoliosAdmin() {
+      const txt = document.getElementById('filtro-folio-txt').value.trim().toLowerCase();
+      const tipo = document.getElementById('filtro-folio-tipo').value;
+      const area = document.getElementById('filtro-folio-area').value;
+      const estatus = document.getElementById('filtro-folio-estatus').value;
+      const filtrados = registrosFolios.filter(r => {
+        if (tipo && r.tabla !== tipo) return false;
+        if (area && String(r.f.id_area) !== String(area)) return false;
+        if (estatus && (r.f.estatus || '') !== estatus) return false;
+        if (txt) {
+          const texto = (r.f.folio || '') + ' ' + (r.f.nombre_solicitante || '') + ' ' + (r.f.asunto || '') + ' ' + (valorOrigen(r.f, r.tabla) || '') + ' ' + (r.f.dirigido_a || '');
+          if (!texto.toLowerCase().includes(txt)) return false;
+        }
+        return true;
+      });
+      renderFoliosAdmin(filtrados);
+    }
+
+    function renderFoliosAdmin(registros) {
+      const tbody = document.getElementById('tabla-folios-admin');
+      const total = registros.length;
+      document.getElementById('tab-count-folios').textContent = total;
+      document.getElementById('crud-total-folios').textContent = total;
+      tbody.innerHTML = '';
+      registros.forEach(({ tabla, f }) => {
+        const fecha = f.fecha_solicitud ? presentarFecha(f.fecha_solicitud) : 'N/A';
+        const fechaDoc = f.fecha_documento ? presentarFecha(f.fecha_documento) : 'N/A';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(f.folio || '—')}</strong></td>
+          <td><span class="badge bg-primario">${escapeHtml(NOMBRES_OFICIO[tabla] || tabla)}</span></td>
+          <td>${escapeHtml(getAreaNameById(f.id_area))}</td>
+          <td>${escapeHtml(f.dirigido_a || '—')}</td>
+          <td>${escapeHtml(valorOrigen(f, tabla) || '—')}</td>
+          <td>${escapeHtml(f.asunto ? f.asunto.substring(0, 35) : 'Sin asunto')}</td>
+          <td>${badgeEstatus(f.estatus)}</td>
+          <td>${fecha}</td>
+          <td>${fechaDoc}</td>
+          <td class="text-end">
+            ${f.folio ? `<button type="button" class="btn btn-asiste-primary btn-sm" onclick="editarFolioAdmin('${escapeJs(tabla)}', '${escapeJs(String(f.folio))}')"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Editar</button>` : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      if (registros.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center text-secondary">No hay folios con esos criterios</td></tr>`;
+      }
+    }
+
+    function editarFolioAdmin(tabla, folio) {
+      const oficios = getOficios();
+      const registro = (oficios[tabla] || []).find(f => String(f.folio) === String(folio));
+      if (!registro) {
+        showToast('No se encontró el folio', 'danger');
+        return;
+      }
+
+      document.getElementById('fol-edit-tabla').value = tabla;
+      document.getElementById('fol-edit-folio').value = registro.folio;
+      document.getElementById('fol-edit-tipo-texto').textContent = (NOMBRES_OFICIO[tabla] || tabla) + ' · ' + registro.folio;
+
+      const areaSel = document.getElementById('fol-edit-area');
+      areaSel.innerHTML = '';
+      const areas = getAreas();
+      areas.forEach(a => {
+        if (a.activo !== false || String(a.id) === String(registro.id_area)) {
+          const o = document.createElement('option');
+          o.value = a.id;
+          o.textContent = a.nombre + ' (' + a.sigla + ')';
+          areaSel.appendChild(o);
+        }
+      });
+      areaSel.value = String(registro.id_area);
+      areaSel.disabled = true;
+
+      document.getElementById('fol-edit-asunto').value = registro.asunto || '';
+      const usaCargoOrigen = tipoUsaCargoOrigen(tipoDeRegistro(registro, tabla));
+      document.getElementById('fol-edit-cargo-origen-grupo').hidden = !usaCargoOrigen;
+      document.getElementById('fol-edit-cargo-origen').value = usaCargoOrigen ? valorOrigen(registro, tabla) : '';
+      document.getElementById('fol-edit-dirigido').value = registro.dirigido_a || '';
+      document.getElementById('fol-edit-fechadoc').value = aFechaLocal(registro.fecha_documento);
+      document.getElementById('fol-edit-fechasol').value = aFechaLocal(registro.fecha_solicitud);
+
+      const solSel = document.getElementById('fol-edit-solicitante');
+      solSel.innerHTML = '';
+      const usuarios = getUsuarios();
+      Object.keys(usuarios).forEach(k => {
+        const u = usuarios[k];
+        if (u && u.activo !== false) {
+          const o = document.createElement('option');
+          o.value = u.id;
+          o.textContent = u.nombre + ' (' + u.numero_empleado + ')';
+          solSel.appendChild(o);
+        }
+      });
+      const solActVal = registro.id_usuario_solicitante ? String(registro.id_usuario_solicitante) : '';
+      const existe = [].slice.call(solSel.options).some(o => o.value === solActVal);
+      if (solActVal && !existe) {
+        const o = document.createElement('option');
+        o.value = solActVal;
+        o.textContent = (registro.nombre_solicitante || solActVal) + ' (histórico)';
+        solSel.appendChild(o);
+      }
+      solSel.value = solActVal;
+
+      document.getElementById('fol-edit-estatus').value = registro.estatus || 'Pendiente';
+
+      new bootstrap.Modal(document.getElementById('modalEditarFolio')).show();
+    }
+
+    function guardarCorreccionFolio() {
+      const tabla = document.getElementById('fol-edit-tabla').value;
+      const folio = document.getElementById('fol-edit-folio').value;
+      const idArea = Number(document.getElementById('fol-edit-area').value);
+      const asunto = document.getElementById('fol-edit-asunto').value.trim();
+      const cargoOrigen = document.getElementById('fol-edit-cargo-origen').value.trim();
+      const dirigido = document.getElementById('fol-edit-dirigido').value.trim();
+      const fechaDoc = document.getElementById('fol-edit-fechadoc').value;
+      const fechaSol = document.getElementById('fol-edit-fechasol').value;
+      const idSol = document.getElementById('fol-edit-solicitante').value;
+      const estatus = document.getElementById('fol-edit-estatus').value;
+
+      if (!asunto) {
+        showToast('El asunto es obligatorio', 'warning');
+        return;
+      }
+      if (!fechaDoc || !fechaSol) {
+        showToast('Capture ambas fechas', 'warning');
+        return;
+      }
+
+      const tablas = getOficios();
+      const f = (tablas[tabla] || []).find(r => String(r.folio) === String(folio));
+      if (!f) {
+        showToast('No se encontró el folio', 'danger');
+        return;
+      }
+
+      f.id_area = idArea;
+      f.asunto = asunto;
+      asignarOrigenARegistro(f, tipoDeRegistro(f, tabla), cargoOrigen);
+      f.dirigido_a = dirigido || '';
+      f.fecha_documento = fechaDoc;
+      f.fecha_solicitud = fechaSol;
+      if (idSol) {
+        const u = getUsuarios()[idSol];
+        f.id_usuario_solicitante = idSol;
+        f.nombre_solicitante = u ? u.nombre : (f.nombre_solicitante || idSol);
+      }
+      const estatusPrevio = f.estatus;
+      if (estatus === 'Asignado' && !f.id_usuario_liberador) {
+        f.id_usuario_liberador = (getSession() || {}).id; // corrección administrativa
+      } else if (estatus !== 'Asignado') {
+        f.id_usuario_liberador = null;
+      }
+      f.estatus = estatus;
+      registrarHistorial(f, 'Corrección administrativa',
+        estatusPrevio !== estatus ? 'Estatus: ' + estatusPrevio + ' → ' + estatus : 'Datos corregidos');
+
+      guardarOficios(tablas);
+      showToast('Folio ' + folio + ' corregido', 'success');
+      bootstrap.Modal.getInstance(document.getElementById('modalEditarFolio')).hide();
+      cargarFoliosAdmin();
+      cargarEstadisticas();
+      renderCalendarioFolios('calendario-folios');
+    }
+
+  </script>
+</body>
+</html>

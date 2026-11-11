@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SICOFO - Foliador de Área</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="img/logo-sicofo.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Contenedor de toasts -->
+  <div id="toast-container" class="toast-container"></div>
+  <!-- Sugerencias de solicitantes (autocompletado) -->
+  <datalist id="lista-solicitantes"></datalist>
+
+  <nav class="navbar-asiste">
+    <img class="navbar-logo" src="img/logo-sicofo.png" alt="SICOFO">
+    <a class="navbar-brand" href="dashboard-asignador-area.html">
+      <span>
+        <span class="brand-title d-block">SPyAP</span>
+        <span class="brand-subtitle">Foliador de Área</span>
+      </span>
+    </a>
+    <div class="user-info">
+      <div class="navbar-user">
+        <div class="navbar-avatar-iniciales" id="avatar-iniciales"></div>
+        <div class="navbar-user-info">
+          <span class="navbar-user-nombre" id="nombre-usuario"></span>
+          <span class="navbar-user-area" id="area-usuario"></span>
+          <span class="rol-badge" id="rol-badge"></span>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="cerrarSesion()"><i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <div class="container-admin container-admin--amplio pt-4 pb-4">
+    <h1 class="page-title" id="titulo-seccion" tabindex="-1">Asignar folio</h1>
+
+    <nav class="visor-secciones-nav visor-secciones-nav--filtro" aria-label="Secciones de folios">
+      <ul class="nav-recuadros" id="pestanasFolios" role="tablist">
+        <li class="nav-item" role="presentation"><button type="button" class="recuadro-seccion active" id="tab-generar" role="tab" data-seccion="generar" aria-controls="seccion-generar" aria-selected="true"><i class="bi bi-files recuadro-seccion__icono" aria-hidden="true"></i><span class="recuadro-seccion__texto">Generar folios</span></button></li>
+        <li class="nav-item" role="presentation"><button type="button" class="recuadro-seccion" id="tab-seguimiento" role="tab" data-seccion="seguimiento" aria-controls="seccion-seguimiento" aria-selected="false"><i class="bi bi-journal-check recuadro-seccion__icono" aria-hidden="true"></i><span class="recuadro-seccion__texto">Seguimiento</span><span class="tab-count" data-fuente="pendientes-globales" data-alerta>0</span></button></li>
+      </ul>
+      <div class="filtro-anio" id="filtroAnioSeguimiento" hidden>
+        <label class="filtro-anio__etiqueta" for="select-anio-seguimiento"><i class="bi bi-calendar3" aria-hidden="true"></i>Año</label>
+        <select id="select-anio-seguimiento" class="filtro-anio__select" aria-label="Año de los folios a mostrar en Seguimiento"></select>
+      </div>
+    </nav>
+
+    <section class="cd-seccion" id="seccion-generar" data-titulo="Asignar folio" role="tabpanel" aria-labelledby="tab-generar">
+    <div class="generar-opciones" id="opciones-generar" role="group" aria-label="Tipo de trámite">
+      <button type="button" class="generar-opcion activo" id="btn-opcion-asignar" data-subpanel="asignar" aria-pressed="true"><i class="bi bi-plus-circle" aria-hidden="true"></i><span>Nueva asignación de mi área</span></button>
+      <button type="button" class="generar-opcion" id="btn-opcion-solicitar" data-subpanel="solicitar" aria-pressed="false"><i class="bi bi-send" aria-hidden="true"></i><span>Solicitar folio a mi superior</span></button>
+    </div>
+
+    <div class="folios-preview-seccion folios-preview-seccion--form subpanel-generar" id="subpanel-asignar">
+      <div class="fp-panel-form" id="panel-asignar">
+        <div class="fp-panel-form-inner">
+          <div class="fp-panel-head">
+            <div>
+              <h3 class="fp-titulo">Nueva asignación de mi área</h3>
+              <p class="fp-subtitulo">Asigna folios de la serie de su área. El sistema generará el folio automáticamente.</p>
+            </div>
+          </div>
+
+          <form id="formAsignarArea">
+            <div class="row mb-3">
+              <div class="col-12">
+                <label class="form-label">Tipo de Oficio</label>
+                <div class="tipo-chip-grupo" id="tipo-oficio-area" aria-label="Tipo de documento"></div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-7">
+                <label class="form-label">Área de folio</label>
+                <input type="text" class="form-control" id="area-asignar" readonly>
+                <small class="text-secondary">Los folios se emiten siempre con la serie de su propia área.</small>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md">
+                <label class="form-label">Solicitante <span class="text-secondary small">(nombre o número de empleado · opcional)</span></label>
+                <input type="text" class="form-control" id="solicitante-nombre-area" list="lista-solicitantes" placeholder="Ej: Juan Pérez o SOL-001">
+              </div>
+              <div class="col-md">
+                <label class="form-label">Dirigido a</label>
+                <input type="text" class="form-control" id="dirigido-a-area" placeholder="Ej: Dirección General de Asuntos Jurídicos" required>
+                <div class="mt-3" data-campo-origen>
+                  <label class="form-label" for="cargo-origen-area">Cargo/Dependencia de Origen</label>
+                  <input type="text" class="form-control" id="cargo-origen-area" placeholder="Ej: Director de Planeación" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-4">
+              <div class="col-12">
+                <label class="form-label" for="asunto-oficio-area">Asunto del Oficio</label>
+                <textarea class="form-control campo-asunto" id="asunto-oficio-area" rows="4" placeholder="Ej: Solicitud de recursos para..." required></textarea>
+              </div>
+            </div>
+
+            <div class="asignacion-fecha-layout">
+              <section class="asignacion-calendario">
+                <div class="asignacion-seccion-titulo">
+                  <label class="form-label mb-0">Fecha del Documento</label>
+                  <span>Seleccione el día que llevará el oficio.</span>
+                </div>
+                <input type="date" id="fecha-documento-area" class="d-none" aria-hidden="true">
+                <div class="selector-fecha" id="selector-fecha-documento-area"></div>
+              </section>
+              <aside class="asignacion-resumen" aria-live="polite">
+                <span class="asignacion-resumen__eyebrow">Resumen de asignación</span>
+                <dl>
+                  <div><dt>Tipo</dt><dd id="resumen-tipo-area">Oficio</dd></div>
+                  <div><dt>Serie</dt><dd id="resumen-area-asignar">—</dd></div>
+                  <div><dt>Fecha</dt><dd id="resumen-fecha-area">—</dd></div>
+                </dl>
+                <p>Revise los datos antes de generar el folio.</p>
+                <div class="asignacion-acciones">
+                  <button type="submit" class="btn btn-asiste-primary"><i class="bi bi-check2-circle me-2" aria-hidden="true"></i>Asignar y generar folio</button>
+                  <button type="button" class="btn btn-asiste-secondary" onclick="limpiarFormularioAsignar()">Cancelar</button>
+                </div>
+              </aside>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="fp-panel-form fp-panel-form--standalone subpanel-generar" id="card-solicitar" hidden>
+      <div class="fp-panel-form-inner">
+        <div class="fp-panel-head">
+          <div>
+            <h3 class="fp-titulo">Solicitar folio a mi superior</h3>
+            <p class="fp-subtitulo">Se solicitará a: <strong id="destino-solicitud-txt"></strong>. Su superior asignará el folio.</p>
+          </div>
+        </div>
+
+        <form id="formSolicitar">
+          <div class="row mb-3">
+            <div class="col-12">
+              <label class="form-label">Tipo de Oficio</label>
+              <div class="tipo-chip-grupo" id="tipo-oficio-solicitar" aria-label="Tipo de documento"></div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md">
+              <label class="form-label">Solicitante <span class="text-secondary small">(opcional)</span></label>
+              <input type="text" class="form-control" id="solicitante-nombre-solicitar" list="lista-solicitantes" placeholder="Ej: Juan Pérez">
+            </div>
+            <div class="col-md">
+              <label class="form-label">Dirigido a</label>
+              <input type="text" class="form-control" id="dirigido-a-solicitar" placeholder="Ej: Dirección General de Asuntos Jurídicos" required>
+              <div class="mt-3" data-campo-origen>
+                <label class="form-label" for="cargo-origen-solicitar">Cargo/Dependencia de Origen</label>
+                <input type="text" class="form-control" id="cargo-origen-solicitar" placeholder="Ej: Director de Planeación" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-12">
+              <label class="form-label" for="asunto-solicitar">Asunto del Oficio</label>
+              <textarea class="form-control campo-asunto" id="asunto-solicitar" rows="4" placeholder="Ej: Solicitud de recursos para equipo de cómputo" required></textarea>
+            </div>
+          </div>
+
+          <div class="asignacion-fecha-layout">
+            <section class="asignacion-calendario">
+              <div class="asignacion-seccion-titulo">
+                <label class="form-label mb-0">Fecha del Documento</label>
+                <span>Seleccione el día que llevará el oficio.</span>
+              </div>
+              <input type="date" id="fecha-documento-solicitar" class="d-none" aria-hidden="true">
+              <div class="selector-fecha" id="selector-fecha-documento-solicitar"></div>
+            </section>
+            <aside class="asignacion-resumen" aria-live="polite">
+              <span class="asignacion-resumen__eyebrow">Resumen de solicitud</span>
+              <dl>
+                <div><dt>Tipo</dt><dd id="resumen-tipo-solicitar">Oficio</dd></div>
+                <div><dt>Se solicitará a</dt><dd id="resumen-destino-solicitar">—</dd></div>
+                <div><dt>Fecha</dt><dd id="resumen-fecha-solicitar">—</dd></div>
+              </dl>
+              <p>Revise los datos antes de enviar la solicitud a su superior.</p>
+              <div class="asignacion-acciones">
+                <button type="submit" class="btn btn-asiste-primary"><i class="bi bi-send me-2" aria-hidden="true"></i>Solicitar número de folio</button>
+              </div>
+            </aside>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    </section>
+
+    <section class="cd-seccion" id="seccion-seguimiento" data-titulo="Asignar folio" role="tabpanel" aria-labelledby="tab-seguimiento" hidden>
+    <div class="card-asiste mb-4" id="card-enviadas">
+      <div class="card-header-asiste">
+        <h3 class="card-title-asiste">Solicitudes que envié a mi superior</h3>
+        <span class="badge text-primario">Total: <span id="total-solicitudes-enviadas">0</span></span>
+      </div>
+      <div class="seguimiento-filtros" data-tabla="tabla-solicitudes-enviadas">
+        <div class="seguimiento-filtros__buscador">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <input type="search" class="form-control" data-filtro="q" placeholder="Buscar folio (ej. 002, 003)" autocomplete="off" aria-label="Buscar por número de folio">
+        </div>
+        <select class="form-select seguimiento-filtros__select" data-filtro="tipo" aria-label="Filtrar por categoría">
+          <option value="">Todas las categorías</option>
+          <option value="oficios">Oficio</option>
+          <option value="memorandums">Memorándum</option>
+          <option value="circulares">Circular</option>
+          <option value="incidencias">Incidencias</option>
+          <option value="memorandums_comision">Comisión</option>
+        </select>
+        <select class="form-select seguimiento-filtros__select" data-filtro="estatus" aria-label="Filtrar por estatus">
+          <option value="">Todos los estatus</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Asignado">Asignado</option>
+          <option value="cancelado-rechazado">Cancelado / Rechazado</option>
+        </select>
+        <span class="seguimiento-filtros__resultados" aria-live="polite"></span>
+      </div>
+      <div class="table-responsive">
+        <table class="table-asiste">
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Tipo</th>
+              <th>Área destino</th>
+              <th>Dirigido a</th>
+              <th title="Solo aplica a Oficio y Memorándum">Cargo/Dependencia de Origen</th>
+              <th>Asunto</th>
+              <th>Fecha de solicitud</th>
+              <th>Fecha del documento</th>
+              <th>Estatus</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-solicitudes-enviadas"></tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <div class="card-asiste mb-4" id="card-por-asignar">
+      <div class="card-header-asiste">
+        <h3 class="card-title-asiste">Solicitudes por asignar</h3>
+        <span class="badge text-primario">Total: <span id="total-solicitudes-pendientes">0</span></span><span id="pendientes-globales" hidden>0</span>
+      </div>
+      <div class="seguimiento-filtros" data-tabla="tabla-solicitudes-pendientes">
+        <div class="seguimiento-filtros__buscador">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <input type="search" class="form-control" data-filtro="q" placeholder="Buscar folio (ej. 002, 003)" autocomplete="off" aria-label="Buscar por número de folio">
+        </div>
+        <select class="form-select seguimiento-filtros__select" data-filtro="tipo" aria-label="Filtrar por categoría">
+          <option value="">Todas las categorías</option>
+          <option value="oficios">Oficio</option>
+          <option value="memorandums">Memorándum</option>
+          <option value="circulares">Circular</option>
+          <option value="incidencias">Incidencias</option>
+          <option value="memorandums_comision">Comisión</option>
+        </select>
+        <span class="seguimiento-filtros__resultados" aria-live="polite"></span>
+      </div>
+      <div class="table-responsive">
+        <table class="table-asiste">
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Tipo</th>
+              <th>Área que solicita</th>
+              <th>Dirigido a</th>
+              <th title="Solo aplica a Oficio y Memorándum">Cargo/Dependencia de Origen</th>
+              <th>Asunto</th>
+              <th>Solicitante</th>
+              <th>Fecha de solicitud</th>
+              <th>Fecha del documento</th>
+              <th class="text-end">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-solicitudes-pendientes"></tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <div class="card-asiste mb-4" id="card-folios">
+      <div class="card-header-asiste">
+        <h3 class="card-title-asiste">Mis folios asignados</h3>
+        <span class="badge text-primario">Total: <span id="total-asignados">0</span></span>
+      </div>
+      <div class="seguimiento-filtros" data-tabla="tabla-asignados">
+        <div class="seguimiento-filtros__buscador">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          <input type="search" class="form-control" data-filtro="q" placeholder="Buscar folio (ej. 002, 003)" autocomplete="off" aria-label="Buscar por número de folio">
+        </div>
+        <select class="form-select seguimiento-filtros__select" data-filtro="tipo" aria-label="Filtrar por categoría">
+          <option value="">Todas las categorías</option>
+          <option value="oficios">Oficio</option>
+          <option value="memorandums">Memorándum</option>
+          <option value="circulares">Circular</option>
+          <option value="incidencias">Incidencias</option>
+          <option value="memorandums_comision">Comisión</option>
+        </select>
+        <select class="form-select seguimiento-filtros__select" data-filtro="estatus" aria-label="Filtrar por estatus">
+          <option value="">Todos los estatus</option>
+          <option value="Asignado">Asignado</option>
+          <option value="cancelado-rechazado">Cancelado / Rechazado</option>
+        </select>
+        <span class="seguimiento-filtros__resultados" aria-live="polite"></span>
+      </div>
+      <div class="table-responsive">
+        <table class="table-asiste">
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Tipo</th>
+              <th>Área</th>
+              <th>Dirigido a</th>
+              <th title="Solo aplica a Oficio y Memorándum">Cargo/Dependencia de Origen</th>
+              <th>Asunto</th>
+              <th>Estatus</th>
+              <th>Fecha de solicitud</th>
+              <th>Fecha del documento</th>
+              <th class="text-end">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-asignados"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="rail-card cal-seguimiento" id="card-calendario">
+      <div class="rail-card__head">
+        <h2 class="rail-card__titulo">Calendario de folios por día</h2>
+      </div>
+      <div class="cal-folios-contenedor" id="calendario-folios"></div>
+    </div>
+
+    </section>
+  </div>
+
+  <footer class="footer-asiste">
+    Secretaría de Pesca y Acuacultura del Pueblo · Gobierno de Chiapas 2024 – 2030 · SICOFO
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const session = sesionVigente({ permiso: 'asignar_oficio', mensaje: 'No tiene permiso para asignar oficios' });
+      if (!session) return;
+      pintarUsuario(session);
+      poblarDatalistSolicitantes();
+
+      const selectArea = document.getElementById('area-asignar');
+      selectArea.value = getAreaNameById(session.area) + ' (' + getSiglaByAreaId(session.area) + ')';
+      const actualizarResumenArea = () => {
+        const tipo = getTipoOficioChipSeleccionado('tipo-oficio-area');
+        document.getElementById('resumen-tipo-area').textContent = (TIPOS_DOCUMENTO_CHIP[tipo] || {}).label || tipo;
+        document.getElementById('resumen-area-asignar').textContent = getSiglaByAreaId(session.area) || '—';
+      };
+      renderTipoOficioChips('tipo-oficio-area', actualizarResumenArea);
+      const actualizarResumenSolicitar = () => {
+        const tipo = getTipoOficioChipSeleccionado('tipo-oficio-solicitar');
+        document.getElementById('resumen-tipo-solicitar').textContent = (TIPOS_DOCUMENTO_CHIP[tipo] || {}).label || tipo;
+      };
+      renderTipoOficioChips('tipo-oficio-solicitar', actualizarResumenSolicitar);
+      crearSelectorFecha({
+        contenedorId: 'selector-fecha-documento-area',
+        inputId: 'fecha-documento-area',
+        desplegable: true,
+        onCambio: fecha => { document.getElementById('resumen-fecha-area').textContent = presentarFecha(fecha); }
+      });
+      crearSelectorFecha({
+        contenedorId: 'selector-fecha-documento-solicitar',
+        inputId: 'fecha-documento-solicitar',
+        desplegable: true,
+        onCambio: fecha => { document.getElementById('resumen-fecha-solicitar').textContent = presentarFecha(fecha); }
+      });
+      actualizarResumenArea();
+      document.getElementById('resumen-fecha-area').textContent = presentarFecha(document.getElementById('fecha-documento-area').value);
+
+      const destino = getDestinoSolicitud(session.area);
+      document.getElementById('destino-solicitud-txt').textContent = getAreaNameById(destino) + ' (' + getSiglaByAreaId(destino) + ')';
+      document.getElementById('resumen-destino-solicitar').textContent = getSiglaByAreaId(destino) + ' · ' + getAreaNameById(destino);
+      actualizarResumenSolicitar();
+      document.getElementById('resumen-fecha-solicitar').textContent = presentarFecha(document.getElementById('fecha-documento-solicitar').value);
+      // Sin superior al que solicitar: se quitan del menú las secciones de solicitudes enviadas.
+      if (destino === session.area) {
+        ['card-solicitar', 'card-enviadas'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.remove();
+        });
+      }
+
+      // Opciones de "Generar folios" según el rol: asignar = permiso de liberar (asignar_oficio);
+      // solicitar = permiso solicitar_oficio y que exista un superior al que dirigir la solicitud.
+      const puedeAsignar = hasPermission('asignar_oficio');
+      const puedeSolicitar = hasPermission('solicitar_oficio') && destino !== session.area;
+      const subpaneles = { asignar: 'subpanel-asignar', solicitar: 'card-solicitar' };
+      if (!puedeAsignar) { ['btn-opcion-asignar', 'subpanel-asignar'].forEach(id => { const el = document.getElementById(id); if (el) el.remove(); }); }
+      if (!puedeSolicitar) { ['btn-opcion-solicitar', 'card-solicitar'].forEach(id => { const el = document.getElementById(id); if (el) el.remove(); }); }
+      function mostrarSubpanelGenerar(clave) {
+        if (!document.getElementById(subpaneles[clave])) return;
+        Object.keys(subpaneles).forEach(k => {
+          const panel = document.getElementById(subpaneles[k]);
+          if (panel) panel.hidden = k !== clave;
+          const btn = document.getElementById('btn-opcion-' + k);
+          if (btn) { btn.classList.toggle('activo', k === clave); btn.setAttribute('aria-pressed', k === clave ? 'true' : 'false'); }
+        });
+      }
+      window.mostrarSubpanelGenerar = mostrarSubpanelGenerar;
+      document.querySelectorAll('.generar-opcion[data-subpanel]').forEach(b =>
+        b.addEventListener('click', () => mostrarSubpanelGenerar(b.getAttribute('data-subpanel'))));
+      mostrarSubpanelGenerar(puedeAsignar ? 'asignar' : 'solicitar');
+
+      window.__refrescarTablas = function() {
+        renderSolicitudesEnviadas('tabla-solicitudes-enviadas', 'total-solicitudes-enviadas', session.area);
+        renderSolicitudesPendientes('tabla-solicitudes-pendientes', 'total-solicitudes-pendientes', session.area);
+        renderAsignadosDe('tabla-asignados', 'total-asignados', session.area);
+        renderCalendarioFolios('calendario-folios');
+        actualizarContadoresMenu();
+      };
+      const renderFiltrablePorTabla = {
+        'tabla-solicitudes-enviadas': () => renderSolicitudesEnviadas('tabla-solicitudes-enviadas', 'total-solicitudes-enviadas', session.area),
+        'tabla-solicitudes-pendientes': () => renderSolicitudesPendientes('tabla-solicitudes-pendientes', 'total-solicitudes-pendientes', session.area),
+        'tabla-asignados': () => renderAsignadosDe('tabla-asignados', 'total-asignados', session.area)
+      };
+      document.querySelectorAll('.seguimiento-filtros').forEach(barra => {
+        const rerender = renderFiltrablePorTabla[barra.getAttribute('data-tabla')];
+        if (!rerender) return;
+        barra.addEventListener('input', rerender);
+        barra.addEventListener('change', rerender);
+      });
+
+      window.__refrescarTablas();
+      iniciarMenuLateral({ inicial: 'generar' });
+
+      function limpiarFormularioAsignar() {
+        formAsignar.reset();
+        document.getElementById('area-asignar').value = getAreaNameById(session.area) + ' (' + getSiglaByAreaId(session.area) + ')';
+        restablecerSelectorFecha('selector-fecha-documento-area');
+        setTipoOficioChip('tipo-oficio-area', 'oficio');
+        actualizarResumenArea();
+      }
+      window.limpiarFormularioAsignar = limpiarFormularioAsignar;
+
+      const formAsignar = document.getElementById('formAsignarArea');
+      formAsignar.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const tipo = getTipoOficioChipSeleccionado('tipo-oficio-area');
+        const areaSigla = getSiglaByAreaId(session.area);
+        const asunto = document.getElementById('asunto-oficio-area').value.replace(/\s+/g, ' ').trim();
+        const cargoOrigen = leerOrigenFormulario('tipo-oficio-area');
+        const dirigido = document.getElementById('dirigido-a-area').value.trim();
+        const fechaDoc = document.getElementById('fecha-documento-area').value;
+
+        if (!asunto) {
+          showToast('Capture el asunto del oficio', 'warning');
+          return;
+        }
+        if (tipoUsaCargoOrigen(tipo) && !cargoOrigen) {
+          showToast('Capture el cargo/dependencia de origen', 'warning');
+          return;
+        }
+        if (!dirigido) {
+          showToast('Capture a quién va dirigido el oficio', 'warning');
+          return;
+        }
+        if (!fechaDoc) {
+          showToast('Capture la fecha del documento', 'warning');
+          return;
+        }
+
+        const folio = asignarOficio(tipo, areaSigla, asunto, fechaDoc, session, 'solicitante-nombre-area', dirigido, cargoOrigen);
+        if (!folio) {
+          showToast('Error al generar el folio', 'danger');
+          return;
+        }
+
+        showToast('Oficio asignado con folio: ' + folio, 'success', {
+          detalle: 'El registro ya está disponible en la tabla de folios asignados.',
+          accion: {
+            etiqueta: 'Ver folios asignados',
+            onClick: () => mostrarSeccionMenu('seguimiento')
+          }
+        });
+        setAnioSeguimiento(anioDeFecha(fechaDoc));
+        formAsignar.reset();
+        document.getElementById('area-asignar').value = getAreaNameById(session.area) + ' (' + getSiglaByAreaId(session.area) + ')';
+        restablecerSelectorFecha('selector-fecha-documento-area');
+        setTipoOficioChip('tipo-oficio-area', 'oficio');
+        actualizarResumenArea();
+        window.__refrescarTablas();
+      });
+
+      const formSolicitar = document.getElementById('formSolicitar');
+      formSolicitar.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const tipo = getTipoOficioChipSeleccionado('tipo-oficio-solicitar');
+        const asunto = document.getElementById('asunto-solicitar').value.replace(/\s+/g, ' ').trim();
+        const cargoOrigen = leerOrigenFormulario('tipo-oficio-solicitar');
+        const dirigido = document.getElementById('dirigido-a-solicitar').value.trim();
+        const fechaDoc = document.getElementById('fecha-documento-solicitar').value;
+
+        if (!asunto) {
+          showToast('Capture el asunto del oficio', 'warning');
+          return;
+        }
+        if (tipoUsaCargoOrigen(tipo) && !cargoOrigen) {
+          showToast('Capture el cargo/dependencia de origen', 'warning');
+          return;
+        }
+        if (!dirigido) {
+          showToast('Capture a quién va dirigido el oficio', 'warning');
+          return;
+        }
+        if (!fechaDoc) {
+          showToast('Capture la fecha del documento', 'warning');
+          return;
+        }
+
+        const res = solicitarFolio(tipo, asunto, fechaDoc, session, 'solicitante-nombre-solicitar', dirigido, cargoOrigen);
+        if (!res) {
+          showToast('Error al generar la solicitud', 'danger');
+          return;
+        }
+
+        showToast('Solicitud enviada · Folio ' + res.folio, 'success', {
+          detalle: 'Se envió a ' + res.destino + ' (' + res.destinoSigla + ').',
+          expandible: 'La solicitud permanecerá en seguimiento hasta que la oficina de la Secretaría la asigne o la rechace.',
+          accion: {
+            etiqueta: 'Ver solicitudes',
+            onClick: () => mostrarSeccionMenu('seguimiento')
+          }
+        });
+        setAnioSeguimiento(anioDeFecha(fechaDoc));
+        formSolicitar.reset();
+        restablecerSelectorFecha('selector-fecha-documento-solicitar');
+        setTipoOficioChip('tipo-oficio-solicitar', 'oficio');
+        actualizarResumenSolicitar();
+        window.__refrescarTablas();
+      });
+    });
+  </script>
+</body>
+</html>
